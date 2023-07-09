@@ -27,6 +27,14 @@ def diff_export_format_choices():
     return [form.value for form in DiffExportFormat]
 
 
+def get_command_loader_for_check():
+    from azure.cli.core import get_default_cli  # pylint: disable=import-error
+    backed_az_cli = get_default_cli()
+    # load commands, args, and help
+    _create_invoker_and_load_cmds(backed_az_cli)
+    return backed_az_cli.invocation.commands_loader
+
+
 # pylint: disable=too-many-statements
 def export_command_meta(modules=None, git_source=None, git_target=None, git_repo=None,
                         with_help=False, with_example=False,
@@ -80,9 +88,13 @@ def export_command_meta(modules=None, git_source=None, git_target=None, git_repo
     if not command_loader.command_table:
         logger.warning('No commands selected to check.')
 
+    command_loader_for_check = get_command_loader_for_check()
+
     commands_info = []
 
     for command_name, command in command_loader.command_table.items():
+        if command_name != "ams asset get-sas-urls":
+            continue
         command_info = {
             "name": command_name,
             "source": _get_command_source(command_name, command),
@@ -116,7 +128,7 @@ def export_command_meta(modules=None, git_source=None, git_target=None, git_repo
                 pass
 
         commands_info.append(command_info)
-    commands_meta = get_commands_meta(command_loader.command_group_table, commands_info, with_help, with_example)
+    commands_meta = get_commands_meta(command_loader, command_loader_for_check, commands_info, with_help, with_example)
     gen_commands_meta(commands_meta, meta_output_path)
     display(f"Total Commands: {len(commands_info)} from {', '.join(selected_mod_names)} have been generated.")
 

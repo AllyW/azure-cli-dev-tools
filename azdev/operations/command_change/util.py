@@ -68,7 +68,7 @@ def process_aaz_argument(az_arguments_schema, argument_settings, para):
     aaz_type = _fields.get(argument_settings["dest"], None)
     if aaz_type:
         para["aaz_type"] = aaz_type.__class__.__name__
-        # para["type"] = aaz_type._type_in_help  # pylint: disable=protected-access
+        para["type"] = aaz_type._type_in_help  # pylint: disable=protected-access
         if has_value(aaz_type._default):  # pylint: disable=protected-access
             para["aaz_default"] = aaz_type._default  # pylint: disable=protected-access
         if para["aaz_type"] in ["AAZArgEnum"] and aaz_type.get("enum", None) and aaz_type.enum.get("items", None):
@@ -95,21 +95,39 @@ def process_arg_options(argument_settings, para):
     para["options"] = sorted(option_list)
 
 
-all_types = set()
 def process_arg_type(argument_settings, para):
     if not argument_settings.get("type", None):
         return
     configured_type = argument_settings["type"]
+    raw_type = None
     if hasattr(configured_type, "__name__"):
-        para["type"] = configured_type.__name__
+        raw_type = configured_type.__name__
     elif hasattr(configured_type, "__class__"):
-        para["type"] = configured_type.__class__.__name__
+        raw_type = configured_type.__class__.__name__
     else:
         print("unsupported type", configured_type)
-    all_types.add(para["type"])
+        return
+    para["type"] = raw_type if raw_type in ["str", "int", "float", "bool", "file_type"] else "custom_type"
 
 
-def gen_command_meta(command_info, with_help=False, with_example=False):
+def process_arg_default(command_loader_for_check, command_name, argument_settings, para):
+    if not argument_settings.get("default", None):
+        return
+    if not isinstance(argument_settings["default"], (float, int, str, list, bool)):
+        raw_default = str(argument_settings["default"])
+    else:
+        raw_default = argument_settings["default"]
+    command_loader_for_check.load_arguments(command_name)
+    new_loaded_arguments = command_loader_for_check.command_table[command_name].arguments
+    if not isinstance(new_loaded_arguments[argument_settings['dest']].type.settings["default"],
+                      (float, int, str, list, bool)):
+        checked_default = str(new_loaded_arguments[argument_settings['dest']].type.settings["default"])
+    else:
+        checked_default = new_loaded_arguments[argument_settings['dest']].type.settings["default"]
+    para["default"] = raw_default if raw_default == checked_default else "SYS_DEFAULT"
+
+
+def gen_command_meta(command_loader_for_check, command_info, with_help=False, with_example=False):
     stored_property_when_exist = ["confirmation", "supports_no_wait", "is_preview"]
     command_meta = {
         "name": command_info["name"],
@@ -130,6 +148,8 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
             pass
     parameters = []
     for _, argument in command_info["arguments"].items():
+        if _ != "expiry_time":
+            continue
         if argument.type is None:
             continue
         settings = argument.type.settings
@@ -143,6 +163,7 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
         }
         process_arg_options(settings, para)
         process_arg_type(settings, para)
+        process_arg_default(command_loader_for_check, command_info["name"], settings, para)
         if settings.get("required", False):
             para["required"] = True
         if settings.get("choices", None):
@@ -151,11 +172,6 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
             para["id_part"] = settings["id_part"]
         if settings.get("nargs", None):
             para["nargs"] = settings["nargs"]
-        if settings.get("default", None):
-            if not isinstance(settings["default"], (float, int, str, list, bool)):
-                para["default"] = str(settings["default"])
-            else:
-                para["default"] = settings["default"]
         if with_help:
             para["desc"] = settings["help"]
         if command_info["is_aaz"] and command_info["az_arguments_schema"]:
@@ -165,9 +181,9 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
     return command_meta
 
 
-def get_commands_meta(command_group_table, commands_info, with_help, with_example):
+def get_commands_meta(command_loader, command_loader_for_check, commands_info, with_help, with_example):
     commands_meta = {}
-
+    command_group_table = command_loader.command_group_table
     for command_info in commands_info:  # pylint: disable=too-many-nested-blocks
         module_name = command_info["source"]["module"]
         command_name = command_info["name"]
@@ -204,7 +220,7 @@ def get_commands_meta(command_group_table, commands_info, with_help, with_exampl
                 if command_name in command_group_info["commands"]:
                     logger.warning("repeated command: %i", command_name)
                     break
-                command_meta = gen_command_meta(command_info, with_help, with_example)
+                command_meta = gen_command_meta(command_loader_for_check, command_info, with_help, with_example)
                 command_group_info["commands"][command_name] = command_meta
                 break
     return commands_meta
@@ -213,7 +229,6 @@ def get_commands_meta(command_group_table, commands_info, with_help, with_exampl
 def gen_commands_meta(commands_meta, meta_output_path=None):
     options = jsbeautifier.default_options()
     options.indent_size = 4
-    print(all_types)
     for key, module_info in commands_meta.items():
         file_name = "az_" + key + "_meta.json"
         if meta_output_path:

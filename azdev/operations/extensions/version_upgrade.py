@@ -9,6 +9,7 @@
 # https://github.com/Azure/azure-cli/blob/release/doc/extensions/versioning_guidelines.md
 
 from packaging.version import parse
+from knack.util import CLIError
 from azure_cli_diff_tool.utils import DiffLevel
 from azdev.operations.constant import (PREVIEW_INIT_SUFFIX, VERSION_MAJOR_TAG, VERSION_MINOR_TAG,
                                        VERSION_PATCH_TAG, VERSION_STABLE_TAG, VERSION_PREVIEW_TAG, VERSION_PRE_TAG,
@@ -70,8 +71,8 @@ class VersionUpgradeMod:
         self.init_version_pre_tag()
         self.next_version = ModuleVersion(self.version)
         self.last_stable_major = float('inf')
-        from azdev.operations.extensions import show_extension
-        self.pkg_name = show_extension(self.module_name)["pkg_name"]
+        self.pkg_name = self.module_name
+        self.parse_pkg_name()
         self.parse_last_stable_major()
 
     def norm_versions(self):
@@ -180,6 +181,13 @@ class VersionUpgradeMod:
                 max_stable_major = max(version_parse.major, max_stable_major)
                 has_stable = True
         return has_stable, max_stable_major
+
+    def parse_pkg_name(self):
+        from azdev.operations.extensions import show_extension
+        try:
+            self.pkg_name = show_extension(self.module_name)["pkg_name"]
+        except CLIError:
+            pass
 
     def parse_last_stable_major(self):
         import requests

@@ -157,9 +157,10 @@ def show_extension(mod_name):
         "path": mod_install_dir
     }
     # extract pkg name from egg-info or dist-info folders
-    logger.debug("Extracting pkg info from '{}'...".format(mod_install_path[0]))
+    logger.debug("Extracting pkg info from %s...", mod_install_path[0])
     meta_files = ["PKG-INFO", "METADATA"]
-    pkg_info_path = [os.path.join(mod_install_path[0], meta) for meta in meta_files if os.path.isfile(os.path.join(mod_install_path[0], meta))]
+    pkg_info_path = [os.path.join(mod_install_path[0], meta) for meta in meta_files
+                     if os.path.isfile(os.path.join(mod_install_path[0], meta))]
     from .util import get_pkg_info_from_pkg_metafile
     for pkg_info_file in pkg_info_path:
         pkg_info = get_pkg_info_from_pkg_metafile(pkg_info_file)

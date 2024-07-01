@@ -70,6 +70,8 @@ class VersionUpgradeMod:
         self.init_version_pre_tag()
         self.next_version = ModuleVersion(self.version)
         self.last_stable_major = float('inf')
+        from azdev.operations.extensions import show_extension
+        self.pkg_name = show_extension(self.module_name)["pkg_name"]
         self.parse_last_stable_major()
 
     def norm_versions(self):
@@ -184,10 +186,10 @@ class VersionUpgradeMod:
         try:
             response = requests.get(CLI_EXTENSION_INDEX_URL)
             extension_data = response.json()
-            if self.module_name not in extension_data["extensions"]:
+            if self.pkg_name not in extension_data["extensions"]:
                 return
             has_stable, max_stable_major = self.find_max_version(
-                extension_data["extensions"][self.module_name])
+                extension_data["extensions"][self.pkg_name])
             if has_stable:
                 self.last_stable_major = max_stable_major
             else:

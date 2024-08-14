@@ -129,15 +129,11 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
         if command_info.get(prop, None):
             command_meta[prop] = command_info[prop]
     if with_example:
-        try:
-            command_meta["examples"] = command_info["help"]["examples"]
-        except AttributeError:
-            pass
+        if command_info and command_info.get("help", None):
+            command_meta["examples"] = command_info["help"].get("examples", "")
     if with_help:
-        try:
-            command_meta["desc"] = command_info["help"]["short-summary"]
-        except AttributeError:
-            pass
+        if command_info.get("help", None):
+            command_meta["desc"] = command_info["help"].get("short-summary", "")
     parameters = []
     for _, argument in command_info["arguments"].items():
         if argument.type is None:
@@ -169,7 +165,7 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
             else:
                 para["default"] = settings["default"]
         if with_help:
-            para["desc"] = settings["help"]
+            para["desc"] = settings.get("help", "")
         if command_info["is_aaz"] and command_info["az_arguments_schema"]:
             process_aaz_argument(command_info["az_arguments_schema"], settings, para)
         normalize_para_types(para)

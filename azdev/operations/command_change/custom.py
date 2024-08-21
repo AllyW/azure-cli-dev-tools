@@ -159,6 +159,8 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
             para["id_part"] = settings["id_part"]
         if settings.get("nargs", None):
             para["nargs"] = settings["nargs"]
+        if settings.get("completer", None):
+            para["has_completer"] = True
         if settings.get("default", None):
             if not isinstance(settings["default"], (float, int, str, list, bool)):
                 para["default"] = str(settings["default"])

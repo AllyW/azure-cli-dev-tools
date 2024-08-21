@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.1.73
+++++++
+* `azdev command-change meta-export`: Add `has_completer` to denote whether completer is configed in arg
+* `azdev command-change meta-export`: Fix NoneValue error when processing cmd and arg help message
+
 0.1.72
 ++++++
 * Bump `pylint` to 3

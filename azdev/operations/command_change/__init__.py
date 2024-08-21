@@ -4,7 +4,7 @@
 # license information.
 # -----------------------------------------------------------------------------
 
-# pylint: disable=no-else-return, too-many-nested-blocks
+# pylint: disable=no-else-return, too-many-nested-blocks, too-many-locals, too-many-branches
 
 import time
 

@@ -119,6 +119,15 @@ def normalize_para_types(para):
     normalize_para_type(type_bool_opts, "bool")
 
 
+def get_command_examples(command_info, command_meta):
+    example_items = []
+    if command_info and command_info.get("help", None) and hasattr(command_info["help"], "examples"):
+        for example_obj in command_info["help"].examples:
+            example_items.append({"name": example_obj.name, "text": example_obj.text})
+    if example_items:
+        command_meta["examples"] = example_items
+
+
 def gen_command_meta(command_info, with_help=False, with_example=False):
     stored_property_when_exist = ["confirmation", "supports_no_wait", "is_preview", "deprecate_info"]
     command_meta = {
@@ -129,12 +138,7 @@ def gen_command_meta(command_info, with_help=False, with_example=False):
         if command_info.get(prop, None):
             command_meta[prop] = command_info[prop]
     if with_example:
-        example_items = []
-        if command_info and command_info.get("help", None) and hasattr(command_info["help"], "examples"):
-            for example_obj in command_info["help"].examples:
-                example_items.append({"name": example_obj.name, "text": example_obj.text})
-        if example_items:
-            command_meta["examples"] = example_items
+        get_command_examples(command_info, command_meta)
     if with_help:
         if command_info.get("help", None) and hasattr(command_info["help"], "short_summary"):
             command_meta["desc"] = command_info["help"].short_summary

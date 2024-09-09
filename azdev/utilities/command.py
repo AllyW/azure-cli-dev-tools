@@ -7,6 +7,7 @@
 import os
 import subprocess
 import sys
+import shlex
 
 from knack.log import get_logger
 from knack.util import CommandResultItem
@@ -31,9 +32,12 @@ def call(command, **kwargs):
     :param kwargs: Any kwargs supported by subprocess.Popen
     :returns: (int) process exit code.
     """
-    return subprocess.call(
-        command,
-        shell=False,
+    from azdev.utilities import IS_WINDOWS
+    cmd_args = shlex.split(command)
+    if cmd_args[0] == "az" and IS_WINDOWS:
+        cmd_args[0] = "az.bat"
+    return subprocess.run(
+        cmd_args,
         **kwargs)
 
 
@@ -57,10 +61,12 @@ def cmd(command, message=False, show_stderr=True, raise_error=False, **kwargs):
         display(message)
 
     logger.info("Running: %s", command)
+    cmd_args = shlex.split(command)
+    if cmd_args[0] == "az" and IS_WINDOWS:
+        cmd_args[0] = "az.bat"
     try:
         output = subprocess.check_output(
-            command.split(),
-            shell=IS_WINDOWS and command.startswith('az '),
+            cmd_args,
             stderr=subprocess.STDOUT if show_stderr else None,
             **kwargs).decode('utf-8').strip()
         logger.debug(output)

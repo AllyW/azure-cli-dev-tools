@@ -40,7 +40,7 @@ def call(command, **kwargs):
         cmd_args = shlex.split(command)
     return subprocess.run(
         cmd_args,
-        check=False, # supress subprocess-run-check linter warning
+        check=False,  # supress subprocess-run-check linter warning
         **kwargs)
 
 
@@ -97,15 +97,12 @@ def py_cmd(command, message=False, show_stderr=True, raise_error=False, is_modul
     """
     from azdev.utilities import get_env_path
     env_path = get_env_path()
-    print("env path: ", env_path)
-    print("sys.executable: ", sys.executable)
     python_bin = sys.executable if not env_path else os.path.join(
         env_path, 'Scripts' if sys.platform == 'win32' else 'bin', 'python')
     if is_module:
         command = '{} -m {}'.format(python_bin, command)
     else:
         command = '{} {}'.format(python_bin, command)
-    print("cmd: ", command)
     return cmd(command, message, show_stderr, raise_error, **kwargs)
 
 

@@ -33,6 +33,7 @@ def call(command, **kwargs):
     """
     return subprocess.call(
         command,
+        shell=False,
         **kwargs)
 
 
@@ -59,6 +60,7 @@ def cmd(command, message=False, show_stderr=True, raise_error=False, **kwargs):
     try:
         output = subprocess.check_output(
             command.split(),
+            shell=IS_WINDOWS,
             stderr=subprocess.STDOUT if show_stderr else None,
             **kwargs).decode('utf-8').strip()
         logger.debug(output)

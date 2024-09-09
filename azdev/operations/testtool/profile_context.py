@@ -10,9 +10,9 @@ import traceback
 from knack.log import get_logger
 from knack.util import CLIError
 
-from azdev.utilities import call, cmd
+from azdev.utilities import cmd
 from azdev.utilities import display
-
+from azure.cli.core import get_default_cli
 
 logger = get_logger(__name__)
 os.environ['AZURE_CORE_COLLECT_TELEMETRY'] = 'False'
@@ -36,7 +36,9 @@ class ProfileContext:
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.target_profile is not None and self.target_profile != self.origin_profile:
             display('Switching back to origin profile "{}"...'.format(self.origin_profile))
-            call('az cloud update --profile {}'.format(self.origin_profile))
+            # call('az cloud update --profile {}'.format(self.origin_profile))
+            cli = get_default_cli()
+            cli.invoke(["cloud", "update", "--profile", self.origin_profile], out_file=open(os.devnull, 'w'))
 
         if exc_tb:
             display('')

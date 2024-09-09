@@ -37,11 +37,10 @@ def call(command, **kwargs):
     if IS_WINDOWS and command.startswith('az '):
         cmd_args = "az.bat " + command[3:]
     if not IS_WINDOWS:
-            cmd_args = shlex.split(command)
-    print("cmd_args: ", cmd_args)
+        cmd_args = shlex.split(command)
     return subprocess.run(
         cmd_args,
-        check=False,
+        check=False, # supress subprocess-run-check linter warning
         **kwargs)
 
 
@@ -69,8 +68,7 @@ def cmd(command, message=False, show_stderr=True, raise_error=False, **kwargs):
     if IS_WINDOWS and command.startswith('az '):
         cmd_args = "az.bat " + command[3:]
     if not IS_WINDOWS:
-            cmd_args = shlex.split(command)
-    print("cmd_args: ", cmd_args)
+        cmd_args = shlex.split(command)
     try:
         output = subprocess.run(
             cmd_args,

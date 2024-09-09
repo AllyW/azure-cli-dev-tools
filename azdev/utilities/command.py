@@ -38,6 +38,7 @@ def call(command, **kwargs):
         cmd_args[0] = "az.bat"
     return subprocess.run(
         cmd_args,
+        check=False,
         **kwargs)
 
 

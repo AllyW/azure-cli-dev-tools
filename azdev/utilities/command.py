@@ -65,10 +65,12 @@ def cmd(command, message=False, show_stderr=True, raise_error=False, **kwargs):
     if cmd_args[0] == "az" and IS_WINDOWS:
         cmd_args[0] = "az.bat"
     try:
-        output = subprocess.check_output(
+        output = subprocess.run(
             cmd_args,
+            check=True,
+            stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT if show_stderr else None,
-            **kwargs).decode('utf-8').strip()
+            **kwargs).stdout.decode('utf-8').strip()
         logger.debug(output)
         return CommandResultItem(output, exit_code=0, error=None)
     except subprocess.CalledProcessError as err:

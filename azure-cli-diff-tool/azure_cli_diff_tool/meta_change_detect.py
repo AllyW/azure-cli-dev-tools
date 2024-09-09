@@ -57,7 +57,7 @@ class MetaChangeDetect:
     def __get_meta_change_whitelist__(self):
         remote_res = requests.get(META_CHANDE_WHITELIST_FILE_URL)
         if remote_res.status_code != 200:
-            logger.warning("remote meta change whitelist fetch error, use locally")
+            logger.warning("remote meta change whitelist fetch error, use local dict")
             if not os.path.exists(META_CHANDE_WHITELIST_FILE_PATH):
                 logger.info("meta_change_whitelist.txt not exist, skipped")
                 return

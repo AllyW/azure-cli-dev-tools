@@ -33,9 +33,12 @@ def call(command, **kwargs):
     :returns: (int) process exit code.
     """
     from azdev.utilities import IS_WINDOWS
-    cmd_args = shlex.split(command)
-    if cmd_args[0] == "az" and IS_WINDOWS:
-        cmd_args[0] = "az.bat"
+    cmd_args = command
+    if IS_WINDOWS and command.startswith('az '):
+        cmd_args = "az.bat " + command[3:]
+    if not IS_WINDOWS:
+            cmd_args = shlex.split(command)
+    print("cmd_args: ", cmd_args)
     return subprocess.run(
         cmd_args,
         check=False,
@@ -62,9 +65,12 @@ def cmd(command, message=False, show_stderr=True, raise_error=False, **kwargs):
         display(message)
 
     logger.info("Running: %s", command)
-    cmd_args = shlex.split(command)
-    if cmd_args[0] == "az" and IS_WINDOWS:
-        cmd_args[0] = "az.bat"
+    cmd_args = command
+    if IS_WINDOWS and command.startswith('az '):
+        cmd_args = "az.bat " + command[3:]
+    if not IS_WINDOWS:
+            cmd_args = shlex.split(command)
+    print("cmd_args: ", cmd_args)
     try:
         output = subprocess.run(
             cmd_args,
@@ -93,12 +99,15 @@ def py_cmd(command, message=False, show_stderr=True, raise_error=False, is_modul
     """
     from azdev.utilities import get_env_path
     env_path = get_env_path()
+    print("env path: ", env_path)
+    print("sys.executable: ", sys.executable)
     python_bin = sys.executable if not env_path else os.path.join(
         env_path, 'Scripts' if sys.platform == 'win32' else 'bin', 'python')
     if is_module:
         command = '{} -m {}'.format(python_bin, command)
     else:
         command = '{} {}'.format(python_bin, command)
+    print("cmd: ", command)
     return cmd(command, message, show_stderr, raise_error, **kwargs)
 
 

@@ -40,8 +40,8 @@ def call(command, **kwargs):
         cmd_args = shlex.split(command)
     return subprocess.run(
         cmd_args,
-        check=False,  # supress subprocess-run-check linter warning
-        **kwargs)
+        check=False,  # supress subprocess-run-check linter warning, no CalledProcessError
+        **kwargs).returncode
 
 
 def cmd(command, message=False, show_stderr=True, raise_error=False, **kwargs):

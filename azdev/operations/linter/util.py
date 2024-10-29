@@ -6,16 +6,22 @@
 
 import copy
 import re
+import requests
 
 from knack.log import get_logger
 
 from azdev.utilities import get_name_index
+from azdev.operations.constant import ALLOWED_HTML_TAG
 
 
 logger = get_logger(__name__)
 
 
 _LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
+
+_HTML_TAG_RE = re.compile('<(.*?)>')
+
+_HTTP_LINK_RE = re.compile('https?://[^\s]+')
 
 
 def filter_modules(command_loader, help_file_entries, modules=None, include_whl_extensions=False):
@@ -112,3 +118,22 @@ class LinterError(Exception):
     Exception thrown by linter for non rule violation reasons
     """
     pass  # pylint: disable=unnecessary-pass
+
+
+def has_illegal_html_tag(help_message):
+    html_matches = re.findall(_HTML_TAG_RE, help_message)
+    disallowed_html_tags = set(html_matches) - set(ALLOWED_HTML_TAG)
+    return True if disallowed_html_tags else False
+
+def has_broken_site_links(help_message):
+    urls = re.findall(_HTTP_LINK_RE, help_message)
+    invalid_urls = []
+
+    for url in urls:
+        try:
+            response = requests.get(url, timeout=5)
+            if response.status_code != 200:
+                invalid_urls.append(url)
+        except requests.exceptions.RequestException:
+            invalid_urls.append(url)
+    return True if invalid_urls else False

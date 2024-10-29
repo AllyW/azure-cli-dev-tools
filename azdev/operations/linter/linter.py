@@ -150,6 +150,21 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
     def get_parameter_settings(self, command_name, parameter_name):
         return self.get_command_metadata(command_name).arguments.get(parameter_name).type.settings
 
+    def get_parameter_help_info(self, command_name, parameter_name):
+        options = self.get_parameter_options(command_name, parameter_name)
+        command_help = self._loaded_help.get(command_name, None)
+
+        if not command_help:
+            return None
+
+        parameter_helps = command_help.parameters
+        param_help = next((param for param in parameter_helps if share_element(options, param.name.split())), None)
+        # workaround for --ids which is not does not generate doc help (BUG)
+        if not param_help:
+            command_args = self._command_loader.command_table.get(command_name).arguments
+            return command_args.get(parameter_name).type.settings.get('help')
+        return param_help
+
     def command_expired(self, command_name):
         deprecate_info = self._command_loader.command_table[command_name].deprecate_info
         if deprecate_info:
@@ -191,6 +206,10 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         help_entry = self._loaded_help.get(entry, None)
         if help_entry:
             return help_entry.short_summary or help_entry.long_summary
+        return help_entry
+
+    def get_loaded_help_entry(self, entry):
+        help_entry = self._loaded_help.get(entry, None)
         return help_entry
 
     def get_command_test_coverage(self):

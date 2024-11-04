@@ -133,6 +133,7 @@ def has_illegal_html_tag(help_message):
     disallowed_html_tags = set(unbackticked_matches) - set(ALLOWED_HTML_TAG)
     return list(disallowed_html_tags)
 
+
 def has_broken_site_links(help_message):
     """
     Detect broken link in help message.

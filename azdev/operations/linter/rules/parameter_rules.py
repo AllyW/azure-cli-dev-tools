@@ -173,6 +173,7 @@ def option_should_not_contain_under_score(linter, command_name, parameter_name):
         if '_' in option:
             raise RuleError("Argument's option {} contains '_' which should be '-' instead.".format(option))
 
+
 @ParameterRule(LinterSeverity.HIGH)
 def disallowed_html_tag_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
@@ -182,12 +183,14 @@ def disallowed_html_tag_from_parameter(linter, command_name, parameter_name):
         raise RuleError("Disallowed html tags {} in short summary. "
                         "If the content is a placeholder, please remove <> or wrap it with backtick. "
                         "For more info please refer to: {}".format(disallowed_tags,
-                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
+                                                                   DISALLOWED_HTML_TAG_RULE_LINK))
+
     if help_entry.long_summary and (disallowed_tags := has_illegal_html_tag(help_entry.long_summary)):
         raise RuleError("Disallowed html tags {} in long summary. "
                         "If content is a placeholder, please remove <> or wrap it with backtick. "
                         "For more info please refer to: {}".format(disallowed_tags,
-                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
+                                                                   DISALLOWED_HTML_TAG_RULE_LINK))
+
 
 @ParameterRule(LinterSeverity.MEDIUM)
 def broken_site_link_from_parameter(linter, command_name, parameter_name):

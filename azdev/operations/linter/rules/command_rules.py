@@ -4,10 +4,11 @@
 # license information.
 # -----------------------------------------------------------------------------
 
+from azdev.operations.constant import DISALLOWED_HTML_TAG_RULE_LINK
 from ..rule_decorators import CommandRule
 from ..linter import RuleError, LinterSeverity
 from ..util import has_illegal_html_tag, has_broken_site_links
-from azdev.operations.constant import DISALLOWED_HTML_TAG_RULE_LINK
+
 
 @CommandRule(LinterSeverity.HIGH)
 def missing_command_help(linter, command_name):

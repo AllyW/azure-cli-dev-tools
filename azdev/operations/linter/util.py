@@ -21,9 +21,9 @@ _LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__ini
 
 # add html tag extraction for <abd>, <lun1>
 # skip html tag search for <edge zone> <os_des>, <lun1_des>
-_HTML_TAG_RE = re.compile('<([^ \n_>]+)>')
+_HTML_TAG_RE = re.compile(r'<([^ \n_>]+)>')
 
-_HTTP_LINK_RE = re.compile('(?<!`)(https?://[^\s`]+)(?!`)')
+_HTTP_LINK_RE = re.compile(r'(?<!`)(https?://[^\s`]+)(?!`)')
 
 
 def filter_modules(command_loader, help_file_entries, modules=None, include_whl_extensions=False):
@@ -147,6 +147,6 @@ def has_broken_site_links(help_message):
             response = requests.get(url, timeout=5)
             if response.status_code != 200:
                 invalid_urls.append(url)
-        except requests.exceptions.RequestException as ex:
+        except requests.exceptions.RequestException:
             invalid_urls.append(url)
     return invalid_urls

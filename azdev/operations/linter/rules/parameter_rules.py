@@ -6,10 +6,10 @@
 
 from knack.deprecation import Deprecated
 
+from azdev.operations.constant import DISALLOWED_HTML_TAG_RULE_LINK
 from ..rule_decorators import ParameterRule
 from ..linter import RuleError, LinterSeverity
 from ..util import has_illegal_html_tag, has_broken_site_links
-from azdev.operations.constant import DISALLOWED_HTML_TAG_RULE_LINK
 
 
 @ParameterRule(LinterSeverity.HIGH)

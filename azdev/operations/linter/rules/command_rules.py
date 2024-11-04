@@ -38,6 +38,7 @@ def group_delete_commands_should_confirm(linter, command_name):
             raise RuleError("If this command deletes a collection, or group of resources. "
                             "Please make sure to ask for confirmation.")
 
+
 @CommandRule(LinterSeverity.HIGH)
 def disallowed_html_tag_from_command(linter, command_name):
     if command_name == '' or not linter.get_loaded_help_entry(command_name):
@@ -47,7 +48,7 @@ def disallowed_html_tag_from_command(linter, command_name):
         raise RuleError("Disallowed html tags {} in short summary. "
                         "If the content is a placeholder, please remove <> or wrap it with backtick. "
                         "For more info please refer to: {}".format(disallowed_tags,
-                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
+                                                                   DISALLOWED_HTML_TAG_RULE_LINK))
     if help_entry.long_summary and (disallowed_tags := has_illegal_html_tag(help_entry.long_summary)):
         raise RuleError("Disallowed html tags {} in long summary. "
                         "If content is a placeholder, please remove <> or wrap it with backtick. "

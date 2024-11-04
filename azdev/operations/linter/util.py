@@ -19,9 +19,11 @@ logger = get_logger(__name__)
 
 _LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
 
-_HTML_TAG_RE = re.compile('<(.*?)>')
+# add html tag extraction for <abd>, <lun1>
+# skip html tag search for <edge zone> <os_des>, <lun1_des>
+_HTML_TAG_RE = re.compile('<([^ \n_>]+)>')
 
-_HTTP_LINK_RE = re.compile('https?://[^\s]+')
+_HTTP_LINK_RE = re.compile('(?<!`)(https?://[^\s`]+)(?!`)')
 
 
 def filter_modules(command_loader, help_file_entries, modules=None, include_whl_extensions=False):
@@ -121,19 +123,30 @@ class LinterError(Exception):
 
 
 def has_illegal_html_tag(help_message):
+    """
+    Detect those content wrapped with <> but illegal html tag.
+    Refer to rule doc: https://review.learn.microsoft.com/en-us/help/platform/validation-ref/disallowed-html-tag?branch=main
+    """
     html_matches = re.findall(_HTML_TAG_RE, help_message)
-    disallowed_html_tags = set(html_matches) - set(ALLOWED_HTML_TAG)
-    return True if disallowed_html_tags else False
+    unbackticked_matches = [match for match in html_matches if not re.search(r'`[^`]*' + re.escape(match) + r'[^`]*`',
+                                                                             help_message)]
+    disallowed_html_tags = set(unbackticked_matches) - set(ALLOWED_HTML_TAG)
+    return list(disallowed_html_tags)
 
 def has_broken_site_links(help_message):
+    """
+    Detect broken link in help message.
+    Refer to rule doc: https://review.learn.microsoft.com/en-us/help/platform/validation-ref/other-site-link-broken?branch=main
+    """
     urls = re.findall(_HTTP_LINK_RE, help_message)
     invalid_urls = []
 
     for url in urls:
+        url = url.strip(".,()[]{}<>! ")
         try:
             response = requests.get(url, timeout=5)
             if response.status_code != 200:
                 invalid_urls.append(url)
-        except requests.exceptions.RequestException:
+        except requests.exceptions.RequestException as ex:
             invalid_urls.append(url)
-    return True if invalid_urls else False
+    return invalid_urls

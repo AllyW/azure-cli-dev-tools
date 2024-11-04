@@ -159,10 +159,6 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
 
         parameter_helps = command_help.parameters
         param_help = next((param for param in parameter_helps if share_element(options, param.name.split())), None)
-        # workaround for --ids which is not does not generate doc help (BUG)
-        if not param_help:
-            command_args = self._command_loader.command_table.get(command_name).arguments
-            return command_args.get(parameter_name).type.settings.get('help')
         return param_help
 
     def command_expired(self, command_name):

@@ -143,11 +143,13 @@ def has_broken_site_links(help_message):
     invalid_urls = []
 
     for url in urls:
-        url = url.strip(".,()[]{}<>! ")
+        url = re.sub(r'[.")\'\s]*$', '', url)
         try:
             response = requests.get(url, timeout=5)
             if response.status_code != 200:
                 invalid_urls.append(url)
-        except requests.exceptions.RequestException:
+                print(" status code: {0}, url: {1}".format(response.status_code, url))
+        except requests.exceptions.RequestException as ex:
             invalid_urls.append(url)
+            print(" exception: {0}, url: {1}".format(str(ex), url))
     return invalid_urls

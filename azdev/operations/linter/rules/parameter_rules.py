@@ -192,7 +192,7 @@ def disallowed_html_tag_from_parameter(linter, command_name, parameter_name):
                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
 
 
-@ParameterRule(LinterSeverity.MEDIUM)
+@ParameterRule(LinterSeverity.HIGH)
 def broken_site_link_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
         return

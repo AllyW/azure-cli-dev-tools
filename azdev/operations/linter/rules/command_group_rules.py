@@ -61,7 +61,7 @@ def disallowed_html_tag_from_command_group(linter, command_group_name):
                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
 
 
-@CommandGroupRule(LinterSeverity.MEDIUM)
+@CommandGroupRule(LinterSeverity.HIGH)
 def broken_site_link_from_command_group(linter, command_group_name):
     if command_group_name == '' or not linter.get_loaded_help_entry(command_group_name):
         return

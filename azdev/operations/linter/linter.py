@@ -20,7 +20,7 @@ from azdev.operations.regex import (
     search_argument_context,
     search_command,
     search_command_group)
-from azdev.utilities import diff_branches_detail
+from azdev.utilities import diff_branches_detail, diff_branch_file_patch
 from azdev.utilities.path import get_cli_repo_path, get_ext_repo_paths
 from .util import share_element, exclude_commands, LinterError
 
@@ -63,6 +63,9 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         self.git_target = git_target
         self.git_repo = git_repo
         self.exclusions = exclusions
+        self.diffed_lines = set()
+        self._get_diffed_patches()
+
 
     @property
     def commands(self):
@@ -368,6 +371,19 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
                 'Please add some scenario tests for the new parameter',
                 'Or add the parameter with missing_parameter_test_coverage rule in linter_exclusions.yml'])
         return exec_state, violations
+
+    def _get_diffed_patches(self):
+        if not self.git_source or not self.git_target or not self.git_repo:
+            return
+        diff_patches = diff_branch_file_patch(repo=self.git_repo, target=self.git_target, source=self.git_source)
+        for change in diff_patches:
+            patch = change.diff.decode("utf-8")
+            added_lines = [line for line in patch.splitlines() if line.startswith('+') and not line.startswith('+++')]
+            self.diffed_lines += set(added_lines)
+            if added_lines:
+                print(f"Changes in file {change.a_path}:")
+                for line in added_lines:
+                    print(line)
 
 
 # pylint: disable=too-many-instance-attributes

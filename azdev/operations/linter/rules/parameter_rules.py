@@ -179,13 +179,15 @@ def disallowed_html_tag_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
         return
     help_entry = linter.get_parameter_help_info(command_name, parameter_name)
-    if help_entry.short_summary and (disallowed_tags := has_illegal_html_tag(help_entry.short_summary)):
+    if help_entry.short_summary and (disallowed_tags := has_illegal_html_tag(help_entry.short_summary,
+                                                                             linter.diffed_lines)):
         raise RuleError("Disallowed html tags {} in short summary. "
                         "If the content is a placeholder, please remove <> or wrap it with backtick. "
                         "For more info please refer to: {}".format(disallowed_tags,
                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
 
-    if help_entry.long_summary and (disallowed_tags := has_illegal_html_tag(help_entry.long_summary)):
+    if help_entry.long_summary and (disallowed_tags := has_illegal_html_tag(help_entry.long_summary,
+                                                                            linter.diffed_lines)):
         raise RuleError("Disallowed html tags {} in long summary. "
                         "If content is a placeholder, please remove <> or wrap it with backtick. "
                         "For more info please refer to: {}".format(disallowed_tags,
@@ -197,9 +199,11 @@ def broken_site_link_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
         return
     help_entry = linter.get_parameter_help_info(command_name, parameter_name)
-    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summary)):
+    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summary,
+                                                                           linter.diffed_lines)):
         raise RuleError("Broken links {} in short summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))
-    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary)):
+    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary,
+                                                                          linter.diffed_lines)):
         raise RuleError("Broken links {} in long summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))

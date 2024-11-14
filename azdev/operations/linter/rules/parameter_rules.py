@@ -174,7 +174,7 @@ def option_should_not_contain_under_score(linter, command_name, parameter_name):
             raise RuleError("Argument's option {} contains '_' which should be '-' instead.".format(option))
 
 
-@ParameterRule(LinterSeverity.HIGH)
+@ParameterRule(LinterSeverity.MEDIUM)
 def disallowed_html_tag_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
         return
@@ -194,7 +194,7 @@ def disallowed_html_tag_from_parameter(linter, command_name, parameter_name):
                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
 
 
-@ParameterRule(LinterSeverity.HIGH)
+@ParameterRule(LinterSeverity.MEDIUM)
 def broken_site_link_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
         return

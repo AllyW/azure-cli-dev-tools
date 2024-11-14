@@ -45,7 +45,7 @@ def require_wait_command_if_no_wait(linter, command_group_name):
             raise RuleError("Group does not have a 'wait' command, yet '{}' exposes '--no-wait'".format(cmd))
 
 
-@CommandGroupRule(LinterSeverity.HIGH)
+@CommandGroupRule(LinterSeverity.MEDIUM)
 def disallowed_html_tag_from_command_group(linter, command_group_name):
     if command_group_name == '' or not linter.get_loaded_help_entry(command_group_name):
         return
@@ -64,7 +64,7 @@ def disallowed_html_tag_from_command_group(linter, command_group_name):
                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
 
 
-@CommandGroupRule(LinterSeverity.HIGH)
+@CommandGroupRule(LinterSeverity.MEDIUM)
 def broken_site_link_from_command_group(linter, command_group_name):
     if command_group_name == '' or not linter.get_loaded_help_entry(command_group_name):
         return

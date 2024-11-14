@@ -66,7 +66,6 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         self.diffed_lines = set()
         self._get_diffed_patches()
 
-
     @property
     def commands(self):
         return self._command_loader.command_table.keys()

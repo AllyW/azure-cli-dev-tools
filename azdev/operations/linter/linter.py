@@ -379,11 +379,11 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         for change in diff_patches:
             patch = change.diff.decode("utf-8")
             added_lines = [line for line in patch.splitlines() if line.startswith('+') and not line.startswith('+++')]
-            self.diffed_lines += set(added_lines)
+            self.diffed_lines |= set(added_lines)
             if added_lines:
-                print(f"Changes in file {change.a_path}:")
+                _logger.info(f"Changes in file {change.a_path}:")
                 for line in added_lines:
-                    print(line)
+                    _logger.info(line)
 
 
 # pylint: disable=too-many-instance-attributes

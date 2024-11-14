@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # -----------------------------------------------------------------------------
+# pylint: disable=duplicate-code
 
 from azdev.operations.constant import DISALLOWED_HTML_TAG_RULE_LINK
 from ..rule_decorators import CommandRule

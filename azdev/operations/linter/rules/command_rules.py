@@ -40,7 +40,7 @@ def group_delete_commands_should_confirm(linter, command_name):
                             "Please make sure to ask for confirmation.")
 
 
-@CommandRule(LinterSeverity.HIGH)
+@CommandRule(LinterSeverity.MEDIUM)
 def disallowed_html_tag_from_command(linter, command_name):
     if command_name == '' or not linter.get_loaded_help_entry(command_name):
         return
@@ -59,7 +59,7 @@ def disallowed_html_tag_from_command(linter, command_name):
                                                                    DISALLOWED_HTML_TAG_RULE_LINK))
 
 
-@CommandRule(LinterSeverity.HIGH)
+@CommandRule(LinterSeverity.MEDIUM)
 def broken_site_link_from_command(linter, command_name):
     if command_name == '' or not linter.get_loaded_help_entry(command_name):
         return

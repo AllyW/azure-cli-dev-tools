@@ -19,9 +19,9 @@ logger = get_logger(__name__)
 
 _LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
 
-# add html tag extraction for <abd>, <lun1>
-# skip html tag search for <edge zone> <os_des>, <lun1_des>
-_HTML_TAG_RE = re.compile(r'<([^ \n_>]+)>')
+# add html tag extraction for <abd>, <lun1>, <edge zone>
+# html tag search for <os_des>, <lun1_des> is enabled in cli ci but skipped in doc build cause internal issue
+_HTML_TAG_RE = re.compile(r'<([^\n>]+)>')
 
 _HTTP_LINK_RE = re.compile(r'(?<!`)(https?://[^\s`]+)(?!`)')
 

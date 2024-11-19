@@ -64,11 +64,9 @@ def broken_site_link_from_command(linter, command_name):
     if command_name == '' or not linter.get_loaded_help_entry(command_name):
         return
     help_entry = linter.get_loaded_help_entry(command_name)
-    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summary,
-                                                                           linter.diffed_lines)):
+    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summar)):
         raise RuleError("Broken links {} in short summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))
-    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary,
-                                                                          linter.diffed_lines)):
+    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary)):
         raise RuleError("Broken links {} in long summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))

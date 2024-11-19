@@ -150,7 +150,6 @@ def has_broken_site_links(help_message, filtered_lines=None):
             response = requests.get(url, timeout=5)
             if response.status_code != 200:
                 invalid_urls.append(url)
-                print(" status code: {0}, url: {1}".format(response.status_code, url))
         except requests.exceptions.RequestException:
             invalid_urls.append(url)
     if filtered_lines:

@@ -82,7 +82,7 @@ EXCLUDE_MODULES = [
 
 # refer to doc: https://review.learn.microsoft.com/en-us/help/platform/metadata-taxonomies/allowed-html?branch=main
 ALLOWED_HTML_TAG = [
-    "a", "address", "article", "b", "blockquote", "br", "button",
+    "a", "address", "article", "b", "blockquote", "br", "button", "br /",
     "caption", "center", "cite", "code", "col", "colgroup",
     "dd", "del", "details", "div", "dl", "dt", "em", "figcaption", "figure", "form",
     "h1", "h2", "h3", "h4", "head", "hr",

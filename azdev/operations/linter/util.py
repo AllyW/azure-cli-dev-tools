@@ -121,19 +121,18 @@ class LinterError(Exception):
     """
     pass  # pylint: disable=unnecessary-pass
 
-
+# pylint: disable=line-too-long
 def has_illegal_html_tag(help_message, filtered_lines=None):
     """
     Detect those content wrapped with <> but illegal html tag.
     Refer to rule doc: https://review.learn.microsoft.com/en-us/help/platform/validation-ref/disallowed-html-tag?branch=main
     """
     html_matches = re.findall(_HTML_TAG_RE, help_message)
-    unbackticked_matches = [match for match in html_matches if not re.search(r'`[^`]*' + re.escape(match) + r'[^`]*`',
-                                                                             help_message)]
+    unbackticked_matches = [match for match in html_matches if not re.search(r'`[^`]*' + re.escape('<' + match + '>') + r'[^`]*`', help_message)]
     disallowed_html_tags = set(unbackticked_matches) - set(ALLOWED_HTML_TAG)
     if filtered_lines:
-        disallowed_html_tags = [s for s in disallowed_html_tags if any(s in diff_line for diff_line in filtered_lines)]
-    return list(disallowed_html_tags)
+        disallowed_html_tags = [s for s in disallowed_html_tags if any(('<' + s + '>') in diff_line for diff_line in filtered_lines)]
+    return ['<' + s + '>' for s in disallowed_html_tags]
 
 
 def has_broken_site_links(help_message, filtered_lines=None):

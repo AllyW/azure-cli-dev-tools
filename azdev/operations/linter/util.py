@@ -121,6 +121,7 @@ class LinterError(Exception):
     """
     pass  # pylint: disable=unnecessary-pass
 
+
 # pylint: disable=line-too-long
 def has_illegal_html_tag(help_message, filtered_lines=None):
     """

@@ -10,6 +10,7 @@ import requests
 
 from knack.log import get_logger
 
+from azdev.operations.command_change.util import ChangeType
 from azdev.utilities import get_name_index
 from azdev.operations.constant import ALLOWED_HTML_TAG
 
@@ -165,6 +166,8 @@ def is_substring_in_target(string_list, target):
 def add_cmd_example_justification(cmd_example_count):
     if "cmd" not in cmd_example_count or "param_count" not in cmd_example_count or\
             "example_count" not in cmd_example_count:
+        return None
+    if cmd_example_count["change_type"] != ChangeType.ADD:
         return None
     cmd_name_arr = cmd_example_count["cmd"].split()
     if is_substring_in_target(["add", "create", "update"], cmd_name_arr[-1]):

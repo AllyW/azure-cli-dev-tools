@@ -250,10 +250,18 @@ def command_example_diff(base_meta=None, diff_meta=None):
     add_cmd_example = []
     for cmd_name, diff_type in diff_cmds:
         if diff_type == ChangeType.REMOVE:
+            cmd_obj = search_cmd_obj(cmd_name, base_meta)
+            add_cmd_example.append({
+                "cmd": cmd_name,
+                "change_type": diff_type,
+                "param_count": len(cmd_obj["parameters"]) if "parameters" in cmd_obj else 0,
+                "example_count": len(cmd_obj["examples"]) if "examples" in cmd_obj else 0
+            })
             continue
         diff_cmd_obj = search_cmd_obj(cmd_name, diff_meta)
         add_cmd_example.append({
             "cmd": cmd_name,
+            "change_type": diff_type,
             "param_count": len(diff_cmd_obj["parameters"]) if "parameters" in diff_cmd_obj else 0,
             "example_count": len(diff_cmd_obj["examples"]) if "examples" in diff_cmd_obj else 0
         })

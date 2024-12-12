@@ -174,7 +174,7 @@ def option_should_not_contain_under_score(linter, command_name, parameter_name):
             raise RuleError("Argument's option {} contains '_' which should be '-' instead.".format(option))
 
 
-@ParameterRule(LinterSeverity.MEDIUM)
+@ParameterRule(LinterSeverity.HIGH)
 def disallowed_html_tag_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
         return
@@ -199,9 +199,11 @@ def broken_site_link_from_parameter(linter, command_name, parameter_name):
     if linter.command_expired(command_name) or not linter.get_parameter_help_info(command_name, parameter_name):
         return
     help_entry = linter.get_parameter_help_info(command_name, parameter_name)
-    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summary)):
+    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summary,
+                                                                           linter.diffed_lines)):
         raise RuleError("Broken links {} in short summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))
-    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary)):
+    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary,
+                                                                          linter.diffed_lines)):
         raise RuleError("Broken links {} in long summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))

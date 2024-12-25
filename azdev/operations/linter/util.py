@@ -7,11 +7,14 @@
 import copy
 import re
 import requests
+import os
+import json
 
 from knack.log import get_logger
 
 from azdev.utilities import get_name_index
-from azdev.operations.constant import ALLOWED_HTML_TAG
+from azdev.operations.constant import (ALLOWED_HTML_TAG, CMD_EXAMPLE_CONFIG_FILE_URL,
+                                       CMD_EXAMPLE_CONFIG_FILE_PATH, CMD_EXAMPLE_DEFAULT)
 
 
 logger = get_logger(__name__)
@@ -155,3 +158,26 @@ def has_broken_site_links(help_message, filtered_lines=None):
     if filtered_lines:
         invalid_urls = [s for s in invalid_urls if any(s in diff_line for diff_line in filtered_lines)]
     return invalid_urls
+
+
+def get_cmd_example_configurations():
+    cmd_example_threshold = {}
+    remote_res = requests.get(CMD_EXAMPLE_CONFIG_FILE_URL)
+    if remote_res.status_code != 200:
+        logger.warning("remote cmd example configuration fetch error, use local dict")
+        if not os.path.exists(CMD_EXAMPLE_CONFIG_FILE_PATH):
+            logger.info("cmd_example_config.json not exist, skipped")
+            return
+        with open(CMD_EXAMPLE_CONFIG_FILE_PATH, "r") as f_in:
+            cmd_example_threshold = json.load(f_in)
+    else:
+        logger.info("remote cmd example configuration fetch success")
+        cmd_example_threshold = remote_res.json
+    return cmd_example_threshold
+
+
+def get_cmd_example_threshold(cmd_suffix, cmd_example_config):
+    for cmd_type, threshold in cmd_example_config.items():
+        if cmd_suffix.find(cmd_type) != -1:
+            return threshold
+    return CMD_EXAMPLE_DEFAULT

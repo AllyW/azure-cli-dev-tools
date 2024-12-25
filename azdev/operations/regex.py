@@ -173,3 +173,31 @@ def search_deleted_command(line):
     if ref:
         command = ref[0].split(',')[0].strip("'")
     return command
+
+
+def search_aaz_custom_command(line):
+    """
+    re match pattern
+    +   self.command_table['monitor autoscale update'] = AutoScaleUpdate(loader=self)
+    """
+    cmd = ''
+    aaz_custom_cmd_pattern = r"\+.*\.command_table\[['\"](.*?)['\"]\]"
+    ref = re.findall(aaz_custom_cmd_pattern, line)
+    if ref:
+        cmd = ref[0].strip()
+    return cmd
+
+
+def search_aaz_raw_command(lines):
+    """
+    re match pattern
+    +@register_command(
+    +      "monitor autoscale update",
+    +)
+    """
+    cmd = ''
+    aaz_raw_cmd_pattern = r"\+@register_command\([\s\S]*?\+.*?['\"](.*?)['\"]"
+    ref = re.findall(aaz_raw_cmd_pattern, lines)
+    if ref:
+        cmd = ref[0].strip()
+    return cmd

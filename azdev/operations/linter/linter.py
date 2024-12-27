@@ -229,7 +229,7 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
     def check_missing_command_example(self):
         _exclude_commands = self._get_cmd_exclusions(rule_name="missing_command_example")
         cmd_example_config = get_cmd_example_configurations()
-        commands = self._detect_modified_aaz_command()
+        commands = self._detect_modified_command()
         violations = []
         for cmd in commands:
             if cmd in _exclude_commands:
@@ -425,7 +425,7 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
                 'Or add the parameter with missing_parameter_test_coverage rule in linter_exclusions.yml'])
         return exec_state, violations
 
-    def _detect_modified_aaz_command(self):
+    def _detect_modified_command(self):
         diff_index = diff_branches_detail(repo=self.git_repo, target=self.git_target, source=self.git_source)
         modified_commands = set()
         for diff in diff_index:
@@ -437,7 +437,14 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
             lines = list(context_diff(original_lines, current_lines, 'Original', 'Current'))
 
             if 'commands.py' in filename:
-                for _, line in enumerate(lines):
+                for row_num, line in enumerate(lines):
+                    manual_command_suffix = search_command(line)
+                    if manual_command_suffix:
+                        idx = self._get_line_number(lines, row_num, r'--- (\d+),(?:\d+) ----')
+                        manual_command = search_command_group(idx, current_lines, manual_command_suffix)
+                        if manual_command:
+                            modified_commands.add(manual_command)
+
                     aaz_custom_command = search_aaz_custom_command(line)
                     if aaz_custom_command:
                         modified_commands.add(aaz_custom_command)

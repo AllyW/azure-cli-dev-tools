@@ -437,7 +437,7 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
             lines = list(context_diff(original_lines, current_lines, 'Original', 'Current'))
 
             if 'commands.py' in filename:
-                for row_num, line in enumerate(lines):
+                for _, line in enumerate(lines):
                     aaz_custom_command = search_aaz_custom_command(line)
                     if aaz_custom_command:
                         added_commands.add(aaz_custom_command)

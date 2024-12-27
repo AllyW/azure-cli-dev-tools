@@ -6,9 +6,9 @@
 
 import copy
 import re
-import requests
 import os
 import json
+import requests
 
 from knack.log import get_logger
 
@@ -167,7 +167,7 @@ def get_cmd_example_configurations():
         logger.warning("remote cmd example configuration fetch error, use local dict")
         if not os.path.exists(CMD_EXAMPLE_CONFIG_FILE_PATH):
             logger.info("cmd_example_config.json not exist, skipped")
-            return
+            return cmd_example_threshold
         with open(CMD_EXAMPLE_CONFIG_FILE_PATH, "r") as f_in:
             cmd_example_threshold = json.load(f_in)
     else:

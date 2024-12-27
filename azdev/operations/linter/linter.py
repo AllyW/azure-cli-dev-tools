@@ -427,7 +427,7 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
 
     def _detect_modified_aaz_command(self):
         diff_index = diff_branches_detail(repo=self.git_repo, target=self.git_target, source=self.git_source)
-        added_commands = set()
+        modified_commands = set()
         for diff in diff_index:
             file_path, filename = self._split_path(diff.a_path)
             if "aaz" not in file_path or "commands.py" not in filename:
@@ -440,15 +440,15 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
                 for _, line in enumerate(lines):
                     aaz_custom_command = search_aaz_custom_command(line)
                     if aaz_custom_command:
-                        added_commands.add(aaz_custom_command)
+                        modified_commands.add(aaz_custom_command)
 
             if "aaz" in file_path:
                 aaz_raw_command = search_aaz_raw_command(lines)
                 if aaz_raw_command:
-                    added_commands.add(aaz_raw_command)
+                    modified_commands.add(aaz_raw_command)
 
-        commands = list(added_commands)
-        _logger.debug('Added commands: %s', added_commands)
+        commands = list(modified_commands)
+        _logger.debug('Modified commands: %s', modified_commands)
         return commands
 
     def _get_diffed_patches(self):

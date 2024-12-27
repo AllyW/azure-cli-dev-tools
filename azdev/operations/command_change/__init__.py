@@ -38,7 +38,7 @@ def export_command_meta(modules=None, git_source=None, git_target=None, git_repo
     if cli_only or ext_only:
         modules = None
 
-    selected_modules = get_path_table(include_only=modules)
+    selected_modules = get_path_table(include_only=modules, include_whl_extensions=True)
 
     if cli_only:
         selected_modules['ext'] = {}
@@ -84,7 +84,7 @@ def export_command_meta(modules=None, git_source=None, git_target=None, git_repo
             help_info[help_item.command] = help_item
 
     # trim command table to selected_modules
-    command_loader = filter_modules(command_loader, modules=selected_mod_names)
+    command_loader = filter_modules(command_loader, modules=selected_mod_names, include_whl_extensions=True)
 
     if not command_loader.command_table:
         logger.warning('No commands selected to check.')

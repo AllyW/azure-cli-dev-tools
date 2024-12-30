@@ -93,6 +93,7 @@ setup(
         'azdev.config': ['*.*', 'cli_pylintrc', 'ext_pylintrc'],
         'azdev.mod_templates': ['*.*'],
         'azdev.operations.linter.rules': ['ci_exclusions.yml'],
+        'azdev.operations.linter': ["data/*"],
         'azdev.operations.cmdcov': ['*.*'],
         'azdev.operations.breaking_change': ['*.*'],
     },

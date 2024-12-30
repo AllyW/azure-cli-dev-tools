@@ -197,7 +197,7 @@ def search_aaz_raw_command(lines):
     """
     cmd = ''
     aaz_raw_cmd_pattern = r"\+@register_command\([\s\S]*?\+.*?['\"](.*?)['\"]"
-    ref = re.findall(aaz_raw_cmd_pattern, lines)
+    ref = re.findall(aaz_raw_cmd_pattern, str(lines))
     if ref:
         cmd = ref[0].strip()
     return cmd

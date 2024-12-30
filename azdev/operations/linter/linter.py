@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # -----------------------------------------------------------------------------
-
+# pylint: disable=line-too-long
 from difflib import context_diff
 from enum import Enum
 from importlib import import_module
@@ -243,13 +243,11 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
             cmd_example_threshold = get_cmd_example_threshold(cmd_suffix, cmd_example_config)
             if cmd_example_threshold == 0:
                 continue
-            if not hasattr(cmd_help, "example") or len(cmd_help.example) < cmd_example_threshold:
-                violations.append(f'Command should have at least {cmd_example_threshold} example(s)')
+            if not hasattr(cmd_help, "examples") or len(cmd_help.examples) < cmd_example_threshold:
+                violations.append(f'Command `{cmd}` should have at least {cmd_example_threshold} example(s)')
         if violations:
-            violations.insert(0, 'Failed.')
-            violations.extend([
-                'Please add examples for the edited command',
-                'Or add the command with missing_command_example rule in linter_exclusions.yml'])
+            violations.insert(0, 'Check command example failed.')
+            violations.extend(['Please add examples for the modified command Or add the command in rule_exclusions: missing_command_example in linter_exclusions.yml'])
         return violations
 
     def _get_exclusions(self):
@@ -426,32 +424,33 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         return exec_state, violations
 
     def _detect_modified_command(self):
-        diff_index = diff_branches_detail(repo=self.git_repo, target=self.git_target, source=self.git_source)
         modified_commands = set()
-        for diff in diff_index:
-            file_path, filename = self._split_path(diff.a_path)
-            if "aaz" not in file_path or "commands.py" not in filename:
+        diff_patches = diff_branch_file_patch(repo=self.git_repo, target=self.git_target, source=self.git_source)
+        for change in diff_patches:
+            file_path, filename = self._split_path(change.a_path)
+            if "commands.py" not in filename and "aaz" not in file_path:
                 continue
-            original_lines = self._read_blob_lines(diff.a_blob)
-            current_lines = self._read_blob_lines(diff.b_blob)
-            lines = list(context_diff(original_lines, current_lines, 'Original', 'Current'))
-
+            current_lines = self._read_blob_lines(change.b_blob)
+            patch = change.diff.decode("utf-8")
+            patch_lines = patch.splitlines()
             if 'commands.py' in filename:
-                for row_num, line in enumerate(lines):
+                added_lines = [line for line in patch_lines if line.startswith('+') and not line.startswith('+++')]
+                for line in added_lines:
+                    if aaz_custom_command := search_aaz_custom_command(line):
+                        modified_commands.add(aaz_custom_command)
+
+                for row_num, line in enumerate(patch_lines):
+                    if not line.startswith("+") or line.startswith('+++'):
+                        continue
                     manual_command_suffix = search_command(line)
                     if manual_command_suffix:
-                        idx = self._get_line_number(lines, row_num, r'--- (\d+),(?:\d+) ----')
+                        idx = self._get_line_number(patch_lines, row_num, r'@@ -(\d+),(?:\d+) \+(?:\d+),(?:\d+) @@')
                         manual_command = search_command_group(idx, current_lines, manual_command_suffix)
                         if manual_command:
                             modified_commands.add(manual_command)
 
-                    aaz_custom_command = search_aaz_custom_command(line)
-                    if aaz_custom_command:
-                        modified_commands.add(aaz_custom_command)
-
             if "aaz" in file_path:
-                aaz_raw_command = search_aaz_raw_command(lines)
-                if aaz_raw_command:
+                if aaz_raw_command := search_aaz_raw_command(patch):
                     modified_commands.add(aaz_raw_command)
 
         commands = list(modified_commands)

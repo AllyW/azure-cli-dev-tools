@@ -172,7 +172,7 @@ def get_cmd_example_configurations():
             cmd_example_threshold = json.load(f_in)
     else:
         logger.info("remote cmd example configuration fetch success")
-        cmd_example_threshold = remote_res.json
+        cmd_example_threshold = remote_res.json()
     return cmd_example_threshold
 
 

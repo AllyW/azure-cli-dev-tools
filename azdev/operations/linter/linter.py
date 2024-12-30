@@ -247,7 +247,7 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
                 violations.append(f'Command `{cmd}` should have at least {cmd_example_threshold} example(s)')
         if violations:
             violations.insert(0, 'Check command example failed.')
-            violations.extend(['Please add examples for the modified command Or add the command in rule_exclusions: missing_command_example in linter_exclusions.yml'])
+            violations.extend(['Please add examples for the modified command or add the command in rule_exclusions: missing_command_example in linter_exclusions.yml'])
         return violations
 
     def _get_exclusions(self):

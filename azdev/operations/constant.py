@@ -4,7 +4,7 @@
 # license information.
 # -----------------------------------------------------------------------------
 # pylint: disable=line-too-long
-
+import os
 ENCODING = 'utf-8'
 
 # Base on https://github.com/Azure/azure-cli/blob/dev/.github/CODEOWNERS
@@ -259,3 +259,8 @@ VERSION_PREVIEW_TAG = "preview"
 PREVIEW_INIT_SUFFIX = "b1"
 
 CLI_EXTENSION_INDEX_URL = "https://azcliextensionsync.blob.core.windows.net/index1/index.json"
+
+CMD_EXAMPLE_CONFIG_FILE = "./data/cmd_example_config.json"
+CMD_EXAMPLE_CONFIG_FILE_PATH = f"{os.path.dirname(os.path.realpath(__file__))}/linter/{CMD_EXAMPLE_CONFIG_FILE}"
+CMD_EXAMPLE_CONFIG_FILE_URL = "https://azcmdchangemgmt.blob.core.windows.net/azure-cli-dev-tool-config/cmd_example_config.json"
+CMD_EXAMPLE_DEFAULT = 1

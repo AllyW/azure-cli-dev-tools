@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for
 # license information.
 # -----------------------------------------------------------------------------
-
+# pylint: disable=line-too-long
 from difflib import context_diff
 from enum import Enum
 from importlib import import_module
@@ -17,6 +17,7 @@ from knack.log import get_logger
 
 from azdev.operations.regex import (
     get_all_tested_commands_from_regex,
+    search_aaz_raw_command, search_aaz_custom_command,
     search_argument,
     search_argument_context,
     search_command,
@@ -24,7 +25,8 @@ from azdev.operations.regex import (
     search_command_group)
 from azdev.utilities import diff_branches_detail, diff_branch_file_patch
 from azdev.utilities.path import get_cli_repo_path, get_ext_repo_paths
-from .util import share_element, exclude_commands, LinterError
+from .util import (share_element, exclude_commands, LinterError, get_cmd_example_configurations,
+                   get_cmd_example_threshold)
 
 PACKAGE_NAME = 'azdev.operations.linter'
 _logger = get_logger(__name__)
@@ -224,6 +226,30 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         all_tested_command = self._detect_tested_command(diff_index)
         return self._run_parameter_test_coverage(parameters, all_tested_command)
 
+    def check_missing_command_example(self):
+        _exclude_commands = self._get_cmd_exclusions(rule_name="missing_command_example")
+        cmd_example_config = get_cmd_example_configurations()
+        commands = self._detect_modified_command()
+        violations = []
+        for cmd in commands:
+            if cmd in _exclude_commands:
+                continue
+            cmd_help = self._loaded_help.get(cmd, None)
+            if not cmd_help:
+                continue
+            # parameters = cmd_help.parameters
+            # add if future parameter set required
+            cmd_suffix = cmd.split()[-1]
+            cmd_example_threshold = get_cmd_example_threshold(cmd_suffix, cmd_example_config)
+            if cmd_example_threshold == 0:
+                continue
+            if not hasattr(cmd_help, "examples") or len(cmd_help.examples) < cmd_example_threshold:
+                violations.append(f'Command `{cmd}` should have at least {cmd_example_threshold} example(s)')
+        if violations:
+            violations.insert(0, 'Check command example failed.')
+            violations.extend(['Please add examples for the modified command or add the command in rule_exclusions: missing_command_example in linter_exclusions.yml'])
+        return violations
+
     def _get_exclusions(self):
         _exclude_commands = set()
         _exclude_parameters = set()
@@ -237,6 +263,16 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         _logger.debug('exclude_parameters: %s', _exclude_parameters)
         _logger.debug('exclude_comands: %s', _exclude_commands)
         return _exclude_commands, _exclude_parameters
+
+    def _get_cmd_exclusions(self, rule_name=None):
+        _exclude_commands = set()
+        if not rule_name:
+            return _exclude_commands
+        for command, details in self.exclusions.items():
+            if 'rule_exclusions' in details and rule_name in details['rule_exclusions']:
+                _exclude_commands.add(command)
+        _logger.debug('exclude_commands: %s', _exclude_commands)
+        return _exclude_commands
 
     def _split_path(self, path: str):
         parts = path.rsplit('/', maxsplit=1)
@@ -386,6 +422,40 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
                 'Please add some scenario tests for the new parameter',
                 'Or add the parameter with missing_parameter_test_coverage rule in linter_exclusions.yml'])
         return exec_state, violations
+
+    def _detect_modified_command(self):
+        modified_commands = set()
+        diff_patches = diff_branch_file_patch(repo=self.git_repo, target=self.git_target, source=self.git_source)
+        for change in diff_patches:
+            file_path, filename = self._split_path(change.a_path)
+            if "commands.py" not in filename and "aaz" not in file_path:
+                continue
+            current_lines = self._read_blob_lines(change.b_blob)
+            patch = change.diff.decode("utf-8")
+            patch_lines = patch.splitlines()
+            if 'commands.py' in filename:
+                added_lines = [line for line in patch_lines if line.startswith('+') and not line.startswith('+++')]
+                for line in added_lines:
+                    if aaz_custom_command := search_aaz_custom_command(line):
+                        modified_commands.add(aaz_custom_command)
+
+                for row_num, line in enumerate(patch_lines):
+                    if not line.startswith("+") or line.startswith('+++'):
+                        continue
+                    manual_command_suffix = search_command(line)
+                    if manual_command_suffix:
+                        idx = self._get_line_number(patch_lines, row_num, r'@@ -(\d+),(?:\d+) \+(?:\d+),(?:\d+) @@')
+                        manual_command = search_command_group(idx, current_lines, manual_command_suffix)
+                        if manual_command:
+                            modified_commands.add(manual_command)
+
+            if "aaz" in file_path:
+                if aaz_raw_command := search_aaz_raw_command(patch):
+                    modified_commands.add(aaz_raw_command)
+
+        commands = list(modified_commands)
+        _logger.debug('Modified commands: %s', modified_commands)
+        return commands
 
     def _get_diffed_patches(self):
         if not self.git_source or not self.git_target or not self.git_repo:

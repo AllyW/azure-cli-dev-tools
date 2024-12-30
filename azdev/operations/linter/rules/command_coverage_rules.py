@@ -22,3 +22,11 @@ def missing_parameter_test_coverage(linter):
     if not exec_state:
         violation_msg = "\n\t".join(violations)
         raise RuleError(violation_msg + "\n")
+
+
+@CommandCoverageRule(LinterSeverity.HIGH)
+def missing_command_example(linter):
+    violations = linter.check_missing_command_example()
+    if violations:
+        violation_msg = "\n\t".join(violations)
+        raise RuleError(violation_msg + "\n")

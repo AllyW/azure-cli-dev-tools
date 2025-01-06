@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.93
+++++++
+* `azdev linter`: Fix `None` path for added files in `git diff` for `missing_command_example` rule
+
 0.1.92
 ++++++
 * `azdev linter`: Add `missing_command_example` rule

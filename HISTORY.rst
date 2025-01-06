@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.1.92
+++++++
+* `azdev linter`: Add `missing_command_example` rule
+* `azdev linter`: Set `disallowed_html_tags` and `broken_site_link` detection in `high` severity to block future format issues
+
 0.1.91
 ++++++
 * `azdev generate-breaking-change-report`: Update report report template.

@@ -237,8 +237,6 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
             cmd_help = self._loaded_help.get(cmd, None)
             if not cmd_help:
                 continue
-            #
-            # add if future parameter set required
             cmd_suffix = cmd.split()[-1]
             cmd_example_threshold = get_cmd_example_threshold(cmd_suffix, cmd_example_config)
             if cmd_example_threshold == 0:

@@ -45,7 +45,7 @@ def require_wait_command_if_no_wait(linter, command_group_name):
             raise RuleError("Group does not have a 'wait' command, yet '{}' exposes '--no-wait'".format(cmd))
 
 
-@CommandGroupRule(LinterSeverity.MEDIUM)
+@CommandGroupRule(LinterSeverity.HIGH)
 def disallowed_html_tag_from_command_group(linter, command_group_name):
     if command_group_name == '' or not linter.get_loaded_help_entry(command_group_name):
         return
@@ -69,9 +69,11 @@ def broken_site_link_from_command_group(linter, command_group_name):
     if command_group_name == '' or not linter.get_loaded_help_entry(command_group_name):
         return
     help_entry = linter.get_loaded_help_entry(command_group_name)
-    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summary)):
+    if help_entry.short_summary and (broken_links := has_broken_site_links(help_entry.short_summary,
+                                                                           linter.diffed_lines)):
         raise RuleError("Broken links {} in short summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))
-    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary)):
+    if help_entry.long_summary and (broken_links := has_broken_site_links(help_entry.long_summary,
+                                                                          linter.diffed_lines)):
         raise RuleError("Broken links {} in long summary. "
                         "If link is an example, please wrap it with backtick. ".format(broken_links))

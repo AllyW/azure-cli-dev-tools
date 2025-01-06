@@ -237,11 +237,12 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
             cmd_help = self._loaded_help.get(cmd, None)
             if not cmd_help:
                 continue
-            # parameters = cmd_help.parameters
-            # add if future parameter set required
             cmd_suffix = cmd.split()[-1]
             cmd_example_threshold = get_cmd_example_threshold(cmd_suffix, cmd_example_config)
             if cmd_example_threshold == 0:
+                continue
+            if not hasattr(cmd_help, "parameters") or len(cmd_help.parameters) == 0:
+                # skip cmd without parameters
                 continue
             if not hasattr(cmd_help, "examples") or len(cmd_help.examples) < cmd_example_threshold:
                 violations.append(f'Command `{cmd}` should have at least {cmd_example_threshold} example(s)')
@@ -427,7 +428,9 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
         modified_commands = set()
         diff_patches = diff_branch_file_patch(repo=self.git_repo, target=self.git_target, source=self.git_source)
         for change in diff_patches:
-            file_path, filename = self._split_path(change.a_path)
+            if not change.b_path or not change.diff:
+                continue
+            file_path, filename = self._split_path(change.b_path)
             if "commands.py" not in filename and "aaz" not in file_path:
                 continue
             current_lines = self._read_blob_lines(change.b_blob)
@@ -462,6 +465,8 @@ class Linter:  # pylint: disable=too-many-public-methods, too-many-instance-attr
             return
         diff_patches = diff_branch_file_patch(repo=self.git_repo, target=self.git_target, source=self.git_source)
         for change in diff_patches:
+            if not change.diff:
+                continue
             patch = change.diff.decode("utf-8")
             added_lines = [line for line in patch.splitlines() if line.startswith('+') and not line.startswith('+++')]
             self.diffed_lines |= set(added_lines)

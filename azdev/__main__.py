@@ -8,7 +8,6 @@ import sys
 
 from knack import CLI, CLICommandsLoader
 
-from azdev.help import helps  # pylint: disable=unused-import
 from azdev.utilities import get_azdev_config_dir
 
 
